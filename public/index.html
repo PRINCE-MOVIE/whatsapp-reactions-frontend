@@ -3,58 +3,169 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WhatsApp Channel Reactions</title>
+  <title>WhatsApp Channel — Connectez votre chaîne</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    body { margin:0; font-family: Arial, sans-serif; background: #07111f; color:#eef6ff; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-    .hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px; align-items:center; }
-    .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px; }
-    h1 { font-size: clamp(2.2rem, 4vw, 4rem); margin-bottom: 16px; }
-    p { color: #cfe2ff; line-height: 1.6; }
-    .btn { display:inline-block; text-decoration:none; background:#2d6df6; color:#fff; padding:14px 18px; border-radius:12px; font-weight:700; }
-    .btn.secondary { background: transparent; border:1px solid rgba(255,255,255,0.15); margin-left:8px; }
-    .mini { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-top:26px; }
-    .mini div { background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); padding:16px; border-radius:12px; }
-    @media (max-width: 800px) { .hero { grid-template-columns: 1fr; } .mini { grid-template-columns: 1fr; } }
+    :root{--bg:#0b1220;--card:#071826;--muted:#9fb3d6;--accent:#60a5fa;--glass:rgba(255,255,255,0.04)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e6f0ff;background:linear-gradient(180deg,#07111f 0%,#071827 60%);min-height:100vh}
+    .wrap{max-width:1100px;margin:40px auto;padding:28px}
+    .hero{display:flex;gap:24px;align-items:center}
+    .left{flex:1}
+    .title{font-size:clamp(1.6rem,3.6vw,2.6rem);margin:0 0 8px}
+    .lead{color:var(--muted);margin:0 0 18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:18px;border-radius:14px}
+    .connect-row{display:flex;gap:10px;align-items:center}
+    .input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#eaf4ff}
+    .btn{background:var(--accent);color:#06263c;border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#bcd3ff}
+    .status{margin-top:10px;color:var(--muted);font-size:0.95rem}
+    .preview{width:320px}
+    .feed{margin-top:22px}
+    .message{display:block;background:var(--card);padding:14px;border-radius:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.03)}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .from{font-weight:700}
+    .time{color:var(--muted);font-size:0.88rem}
+    .body{margin-bottom:10px;color:#dceeff}
+    .reactions{display:flex;gap:8px;flex-wrap:wrap}
+    .react-btn{background:var(--glass);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:999px;cursor:pointer;color:#eaf4ff;display:inline-flex;align-items:center;gap:8px}
+    .muted-small{color:var(--muted);font-size:0.9rem}
+    footer{margin-top:40px;text-align:center;color:var(--muted);font-size:0.9rem}
+    @media (max-width:900px){.hero{flex-direction:column}.preview{width:100%}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="hero">
-      <div>
+      <div class="left">
+        <h1 class="title">WhatsApp Channel — Réactions automatiques</h1>
+        <p class="lead">Colle ici l'ID de ton numéro (phone_number_id) et clique « Connecter ». Le site s'abonne à ta chaîne : à chaque message reçu, des réactions automatiques seront ajoutées sous le message.</p>
+
         <div class="card">
-          <h1>WhatsApp Channel Reactions</h1>
-          <p>Recevez vos messages WhatsApp, affichez-les sur un site élégant, et laissez les visiteurs réagir sous chaque message.</p>
-          <div>
-            <a class="btn" href="/">Voir le feed</a>
-            <a class="btn secondary" href="#comment-ca-marche">Comment ça marche</a>
+          <div class="connect-row">
+            <input id="channelInput" class="input" placeholder="Colle l'ID de ta chaîne (phone_number_id) ou le lien webhook" />
+            <button id="connectBtn" class="btn">Connecter</button>
+            <button id="clearBtn" class="btn secondary">Déconnecter</button>
           </div>
+          <div id="status" class="status">Aucune chaîne connectée</div>
+        </div>
+
+        <div class="feed" id="feed">
+          <!-- messages injected here -->
         </div>
       </div>
-      <div class="card">
-        <h2 style="margin-top:0">Aperçu</h2>
-        <div style="background:#0d1b2a;padding:14px;border-radius:12px;">
-          <div style="margin-bottom:12px;">+229 00 00 00 00</div>
-          <div style="margin-bottom:8px; background:#122338; padding:10px; border-radius:10px;">Bonjour à tous !</div>
-          <div style="color:#dfeafe;">👍 42 &nbsp; ❤️ 18 &nbsp; 🔥 9</div>
+
+      <div class="preview">
+        <div class="card">
+          <h3 style="margin:0 0 8px">Aperçu en direct</h3>
+          <p class="muted-small">Ton site affichera chaque message reçu par ta chaîne. Les réactions automatiques (👍 ❤️ 🔥) apparaîtront immédiatement.</p>
+
+          <div style="margin-top:14px;">
+            <div style="background:linear-gradient(180deg,#061322,#071827);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong>+229 00 00 00 00</strong><small class="muted-small">Il y a 2 min</small></div>
+              <div style="margin-bottom:12px">Bonjour, ceci est un aperçu du feed. Les réactions apparaissent automatiquement.</div>
+              <div style="display:flex;gap:8px">
+                <span class="react-btn">👍 42</span>
+                <span class="react-btn">❤️ 18</span>
+                <span class="react-btn">🔥 9</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
 
-    <div class="mini" id="comment-ca-marche">
-      <div>
-        <strong>Webhook</strong>
-        <p>Meta envoie les messages WhatsApp à votre site.</p>
-      </div>
-      <div>
-        <strong>Stockage</strong>
-        <p>Les messages et les réactions sont enregistrés dans PostgreSQL.</p>
-      </div>
-      <div>
-        <strong>Réactions</strong>
-        <p>Les visiteurs cliquent sur les emojis et le compteur augmente.</p>
-      </div>
-    </div>
+    <footer>Besoin d'aide ? Assure-toi que le webhook Meta est configuré : URL = <code>/api/webhook</code> et VERIFY_TOKEN dans les variables d'environnement.</footer>
   </div>
+
+  <script>
+    // simple client-side app to connect channel, poll messages and add automatic reactions
+    (function(){
+      const input = document.getElementById('channelInput');
+      const connectBtn = document.getElementById('connectBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const status = document.getElementById('status');
+      const feed = document.getElementById('feed');
+
+      const DEFAULT_REACTIONS = ['like','love','fire'];
+      let channelId = localStorage.getItem('channelId') || '';
+      let processed = new Set(JSON.parse(localStorage.getItem('processedIds')||'[]'));
+
+      function saveProcessed(){
+        localStorage.setItem('processedIds', JSON.stringify(Array.from(processed)));
+      }
+
+      function setStatusText(t){ status.textContent = t }
+
+      function renderMessages(messages){
+        feed.innerHTML = '';
+        if(!messages.length){ feed.innerHTML = '<p style="color:#9fb3d6">Aucun message pour le moment.</p>'; return }
+        messages.forEach(m=>{
+          const div = document.createElement('div'); div.className='message';
+          const meta = document.createElement('div'); meta.className='meta';
+          const from = document.createElement('div'); from.className='from'; from.textContent = m.from_phone || m.whatsapp_from || 'inconnu';
+          const time = document.createElement('div'); time.className='time'; time.textContent = new Date(m.created_at).toLocaleString();
+          meta.appendChild(from); meta.appendChild(time);
+
+          const body = document.createElement('div'); body.className='body'; body.textContent = m.body || '(message multimédia)';
+
+          const reacts = document.createElement('div'); reacts.className='reactions';
+          const counts = m.reaction_counts || {};
+          const buttons = ['like','love','haha','fire','wow','sad'];
+          buttons.forEach(t=>{
+            const b = document.createElement('button'); b.className='react-btn';
+            const emoji = ({like:'👍',love:'❤️',haha:'😂',fire:'🔥',wow:'😮',sad:'😢'})[t] || t;
+            b.innerHTML = emoji + ' ' + (counts[t] || 0);
+            b.addEventListener('click', async ()=>{
+              await fetch('/api/messages/' + m.id + '/reactions', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:t})});
+              await load();
+            });
+            reacts.appendChild(b);
+          });
+
+          div.appendChild(meta); div.appendChild(body); div.appendChild(reacts);
+          feed.appendChild(div);
+        });
+      }
+
+      async function load(){
+        try{
+          const r = await fetch('/api/messages');
+          if(!r.ok) { setStatusText('Erreur fetching messages'); return }
+          const data = await r.json();
+          const visible = channelId ? data.filter(m => m.channel_id === channelId) : data;
+
+          // automatically add default reactions for newly received messages (one-time per browser)
+          for(const m of visible){
+            const total = Object.values(m.reaction_counts || {}).reduce((a,b)=>a+(b||0),0);
+            if(!processed.has(String(m.id)) && total === 0){
+              // add default reactions
+              for(const t of DEFAULT_REACTIONS){
+                try{ await fetch('/api/messages/' + m.id + '/reactions', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type:t})}); }catch(e){}
+              }
+              processed.add(String(m.id)); saveProcessed();
+            }
+          }
+
+          renderMessages(visible);
+          setStatusText(channelId ? 'Connecté à : ' + channelId : 'Aucune chaîne configurée');
+        }catch(e){ console.error(e); setStatusText('Erreur lors du chargement') }
+      }
+
+      connectBtn.addEventListener('click', ()=>{
+        const v = input.value && input.value.trim();
+        if(!v){ setStatusText('Colle l\'ID de ta chaîne'); return }
+        channelId = v; localStorage.setItem('channelId', channelId); setStatusText('Connecté : ' + channelId); load();
+      });
+      clearBtn.addEventListener('click', ()=>{ localStorage.removeItem('channelId'); channelId=''; input.value=''; setStatusText('Déconnecté'); load(); });
+
+      // init
+      if(channelId){ input.value = channelId; setStatusText('Connecté : ' + channelId) }
+      load();
+      setInterval(load, 4000);
+
+    })();
+  </script>
 </body>
 </html>
