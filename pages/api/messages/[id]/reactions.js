@@ -1,4 +1,4 @@
-const db = require('../../../lib/db');
+const db = require('../../../../lib/db');
 
 export default async function handler(req, res) {
   await db.init();
